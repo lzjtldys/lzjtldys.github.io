@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>DSA | 辣子鸡的blog</title>
+<meta name="description" content="随便写写">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://lzjtldys.github.io/favicon.ico?v=1709737052176">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lzjtldys.github.io/styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://lzjtldys.github.io">辣子鸡的blog</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                首页
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="https://lzjtldys.github.io" class="menu">
+                归档
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="https://lzjtldys.github.io" class="menu">
+                标签
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/post/about" class="menu">
+                关于
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>DSA</h1>
+            <p class="article-meta">
+              2024-02-29
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <h3 id="题目">题目：</h3>
+<pre><code class="language-python">from Crypto.Util.number import *
+from gmpy2 import *
+import random, os
+from hashlib import sha1
+
+flag = b'NSSCTF{******}'
+x = bytes_to_long(flag[7:-1])
+q = getPrime(160)
+while True:
+    t = 2*getPrime(1024-160) * q
+    if isPrime(t+1):
+        p = t+1
+        break
+        
+h = random.randint(1, p-2)
+g = powmod(h, (p-1)//q, p)
+y = powmod(g, x, p)
+
+k = random.randint(1, q-1)
+h1 = bytes_to_long(sha1(os.urandom(20)).digest())
+h2 = bytes_to_long(sha1(os.urandom(20)).digest())
+
+r1 = powmod(g, k, p) % q
+s1 = (h1 + x*r1) * invert(k, q) % q
+
+r2 = powmod(g, k, p) % q
+s2 = (h2 + x*r2) * invert(k, q) % q
+
+print(p, q, g, y, sep=',')
+print(f'(h1, r1, s1) = {h1}, {r1}, {s1}')
+print(f'(h2, r2, s2) = {h2}, {r2}, {s2}')
+
+'''
+210145691501773578738377348033311975109097030624229264466788375283767533919326464465174636163332688722224581089450096402386769629298291083760904660611942708672827379160413284668161925839781496461631351601204438246469229385099502482935026018822981911090812522940670041497153171870525509599105379465080807836739,1198259187878727821038260641949026509111920270433,196070047258907618917994526171930725445041293594930451395813866076072912063450682578080857729624238303488600108328510272125657269217146364809009485238108834676036204139548225631723795405961936284355847299908680455823548490632994637690236187388967162639874250381038952479751971000815634264164616859879415711204,113892660154815927896065262713895897930759494276164055918916161302422466569511088272910136873131800900714081704069756811621255412857706485959053239368822240528099295009222226245910132521725945595438150866573053321959800267582969690297868819195328552315818030736239776841162267931134372314713955308734418315441
+(h1, r1, s1) = 288608925920757761908146359265652114672439915971, 70578181835631077171027353972389074292538336310, 10138006399945530096316239936933893062913122896
+(h2, r2, s2) = 292826952671130597654686220387088149924959682815, 70578181835631077171027353972389074292538336310, 601690991376973737187439170192344609140533841457
+'''
+</code></pre>
+<p>可以发现 r1=r2, 那么就能知道他们的k是相等的，那能不能通过求k，再用<br>
+s1 = (h1 + x*r1) * invert(k, q) %q<br>
+求出x呢，尝试之后发现不行，因为g, y的值还是太大了，GSBS算不出来，Pollard’s kangaroo algorithm也没有给范围，所以只能从s1,s2上下手,得到k的表达式<br>
+k = (h1 - h2) * inverse(s1 - s2, q) % q</p>
+<pre><code class="language-python">from gmpy2 import *
+from Crypto.Util.number import *
+from sympy.ntheory import *
+
+p, q, g, y = 210145691501773578738377348033311975109097030624229264466788375283767533919326464465174636163332688722224581089450096402386769629298291083760904660611942708672827379160413284668161925839781496461631351601204438246469229385099502482935026018822981911090812522940670041497153171870525509599105379465080807836739,1198259187878727821038260641949026509111920270433,196070047258907618917994526171930725445041293594930451395813866076072912063450682578080857729624238303488600108328510272125657269217146364809009485238108834676036204139548225631723795405961936284355847299908680455823548490632994637690236187388967162639874250381038952479751971000815634264164616859879415711204,113892660154815927896065262713895897930759494276164055918916161302422466569511088272910136873131800900714081704069756811621255412857706485959053239368822240528099295009222226245910132521725945595438150866573053321959800267582969690297868819195328552315818030736239776841162267931134372314713955308734418315441
+(h1, r1, s1) = 288608925920757761908146359265652114672439915971, 70578181835631077171027353972389074292538336310, 10138006399945530096316239936933893062913122896
+(h2, r2, s2) = 292826952671130597654686220387088149924959682815, 70578181835631077171027353972389074292538336310, 601690991376973737187439170192344609140533841457
+
+k = (h1 - h2) * inverse(s1 - s2, q) % q
+x = (s1*k - h1) * inverse(r1, q) % q
+print(long_to_bytes(x))  
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                下一篇
+              </div>
+              <a href="https://lzjtldys.github.io/post/zuo-ye-3/">
+                <h3 class="post-title">
+                  作业3
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://lzjtldys.github.io/images/avatar.png?v=1709737052176" class="no-responsive avatar">
+    <div class="text-muted">随便写写</div>
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      最新文章
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/litctf-2023baby_xor/">coppersmith</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/kuai-mi-ma/">块密码</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/dsa/">DSA</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/zuo-ye-3/">作业3</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/zuo-ye-2/">作业2</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/zuo-ye/">作业1</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/about/">关于</a>
+            </li>
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      标签列表
+    </div>
+    <div class="row">
+      
+    </div>
+  </div>
+  <div class="paper">
+    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://lzjtldys.github.io/atom.xml" target="_blank">RSS</a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>
