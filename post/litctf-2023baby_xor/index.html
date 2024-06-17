@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>coppersmith | 辣子鸡的blog</title>
+<meta name="description" content="随便写写">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://lzjtldys.github.io/favicon.ico?v=1718630324884">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lzjtldys.github.io/styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://lzjtldys.github.io">辣子鸡的blog</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                首页
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="https://lzjtldys.github.io" class="menu">
+                归档
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="https://lzjtldys.github.io" class="menu">
+                标签
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/post/about" class="menu">
+                关于
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>coppersmith</h1>
+            <p class="article-meta">
+              2024-03-05
+              
+                <a href="https://lzjtldys.github.io/tag/pM33mlY7t/" class="badge success">
+                  RSA
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <h2 id="题目1">题目1：</h2>
+<pre><code class="language-python">from Crypto.Util.number import *
+from secret import flag
+
+m = bytes_to_long(flag)
+assert len(flag)==32
+p = getPrime(512)
+q = getPrime(512)
+n = p*q
+e = 65537
+c1 = p^m
+c2 = pow(m,e,n)
+print(f'n = {n}')
+print(f'c1 = {c1}')
+print(f'c2 = {c2}')
+&quot;&quot;&quot;
+n = 139167681803392690594490403105432649693546256181767408269202101512534988406137879788255103631885736461742577594980136624933914700779445704490217419248411578290305101891222576080645870988658334799437317221565839991979543660824098367011942169305111105129234902517835649895908656770416774539906212596072334423407
+c1 = 11201139662236758800406931253538295757259990870588609533820056210585752522925690049252488581929717556881067021381940083808024384402885422258545946243513996
+c2 = 112016152270171196606652761990170033221036025260883289104273504703557624964071464062375228351458191745141525003775876044271210498526920529385038130932141551598616579917681815276713386113932345056134302042399379895915706991873687943357627747262597883603999621939794450743982662393955266685255577026078256473601
+&quot;&quot;&quot;
+</code></pre>
+<p>c1 = p^m,那么 m = c1^p,给出了flag的长度，很短，所以c1的高位和p的高位应该相等，再通过coopersmith爆破p的低位</p>
+<pre><code class="language-python">from Crypto.Util.number import *
+import gmpy2
+
+n = 139167681803392690594490403105432649693546256181767408269202101512534988406137879788255103631885736461742577594980136624933914700779445704490217419248411578290305101891222576080645870988658334799437317221565839991979543660824098367011942169305111105129234902517835649895908656770416774539906212596072334423407
+c1 = 11201139662236758800406931253538295757259990870588609533820056210585752522925690049252488581929717556881067021381940083808024384402885422258545946243513996
+e=65537
+pbits = 512
+p_high = c1 &gt;&gt; 256
+for i in range(2**8):
+     p4 = p_high&lt;&lt;8
+     p4 = p4 + i
+     kbits = pbits - p4.nbits()
+     p4 = p4 &lt;&lt; kbits
+     PR.&lt;x&gt; = PolynomialRing(Zmod(n))
+     f = x + p4
+     roots = f.small_roots(X=2^kbits, beta=0.4, epsilon=0.01)
+     if roots:
+         p = p4 + int(roots[0])
+         print(p)
+         break
+  m = p^c1
+  print(long_to_bytes(c1^p))       
+</code></pre>
+<p>这里疑惑epsilon是什么，从<a href="https://www.cnblogs.com/App1eTree/p/coppersmith.html#/c/subject/p/coppersmith.html">这里</a>和问学长了解到epsilon越小越精准，但是时间花销大。</p>
+<h2 id="题目2">题目2：</h2>
+<pre><code class="language-python">from Crypto.Util.number import getPrime, bytes_to_long
+from secret import flag
+
+p = getPrime(1024)
+q = getPrime(1024)
+n = p * q
+e = 65537
+hint1 = p &gt;&gt; 724
+hint2 = q % (2 ** 265)
+ct = pow(bytes_to_long(flag), e, n)
+print(hint1)
+print(hint2)
+print(n)
+print(ct)
+&quot;&quot;&quot;
+hint1 = 1514296530850131082973956029074258536069144071110652176122006763622293335057110441067910479
+hint2 = 40812438243894343296354573724131194431453023461572200856406939246297219541329623
+n = 21815431662065695412834116602474344081782093119269423403335882867255834302242945742413692949886248581138784199165404321893594820375775454774521554409598568793217997859258282700084148322905405227238617443766062207618899209593375881728671746850745598576485323702483634599597393910908142659231071532803602701147251570567032402848145462183405098097523810358199597631612616833723150146418889589492395974359466777040500971885443881359700735149623177757865032984744576285054725506299888069904106805731600019058631951255795316571242969336763938805465676269140733371287244624066632153110685509892188900004952700111937292221969
+ct = 19073695285772829730103928222962723784199491145730661021332365516942301513989932980896145664842527253998170902799883262567366661277268801440634319694884564820420852947935710798269700777126717746701065483129644585829522353341718916661536894041337878440111845645200627940640539279744348235772441988748977191513786620459922039153862250137904894008551515928486867493608757307981955335488977402307933930592035163126858060189156114410872337004784951228340994743202032248681976932591575016798640429231399974090325134545852080425047146251781339862753527319093938929691759486362536986249207187765947926921267520150073408188188
+&quot;&quot;&quot;
+</code></pre>
+<pre><code>                                                          q%2^265=ql    
+                                                          q = ql+2^265k
+                                                         n = ql+2^265kp
+                                                nql^-1  = p+ 2^265kpql^-1
+                                                      pl  = nql^-1%2^265
+</code></pre>
+<pre><code class="language-python">from Crypto.Util.number import long_to_bytes
+from gmpy2 import *
+p1 = 1514296530850131082973956029074258536069144071110652176122006763622293335057110441067910479
+q0 = 40812438243894343296354573724131194431453023461572200856406939246297219541329623
+n = 21815431662065695412834116602474344081782093119269423403335882867255834302242945742413692949886248581138784199165404321893594820375775454774521554409598568793217997859258282700084148322905405227238617443766062207618899209593375881728671746850745598576485323702483634599597393910908142659231071532803602701147251570567032402848145462183405098097523810358199597631612616833723150146418889589492395974359466777040500971885443881359700735149623177757865032984744576285054725506299888069904106805731600019058631951255795316571242969336763938805465676269140733371287244624066632153110685509892188900004952700111937292221969
+mod=pow(2,265)
+p0=n*invert(q0,mod)%mod
+pbar=(p1&lt;&lt;724)+p0
+#sage
+PR.&lt;x&gt; = PolynomialRing(Zmod(n))
+
+for i in range(32):
+   f=pbar+x*mod*32
+   f=f.monic()
+   pp=f.small_roots(X=2^454,beta=0.4)
+   if(pp):
+       break
+   pbar+=mod
+
+p=pbar+pp[0]*32*mod
+assert n%p==0
+print(p)
+#p = 133637329398256221348922087205912367118213472434713498908220867690672019569057789598459580146410501473689139466275052698529257254973211963162087316149628000798221014338373126500646873612341158676084318494058522014519669302359038980726479317742766438142835169562422371156257894374341629012755597863752154328407
+q=n//p
+phi=(p-1)*(q-1)
+e=65537
+d=gmpy2.invert(e,phi)
+c=19073695285772829730103928222962723784199491145730661021332365516942301513989932980896145664842527253998170902799883262567366661277268801440634319694884564820420852947935710798269700777126717746701065483129644585829522353341718916661536894041337878440111845645200627940640539279744348235772441988748977191513786620459922039153862250137904894008551515928486867493608757307981955335488977402307933930592035163126858060189156114410872337004784951228340994743202032248681976932591575016798640429231399974090325134545852080425047146251781339862753527319093938929691759486362536986249207187765947926921267520150073408188188
+m=gmpy2.powmod(c,d,n)
+print(long_to_bytes(m)) 
+</code></pre>
+<h3 id="mtctf-2021hamburgerrsa">[MTCTF 2021]hamburgerRSA</h3>
+<p>这也是一道关于位数的题，有点细，也放到了这</p>
+<pre><code class="language-python">from Crypto.Util.number import *
+
+flag = open('flag.txt').read()
+nbit = 64
+
+while True:
+    p, q = getPrime(nbit), getPrime(nbit)
+    PP = int(str(p) + str(p) + str(q) + str(q))
+    QQ = int(str(q) + str(q) + str(p) + str(p))
+    if isPrime(PP) and isPrime(QQ):
+        break
+
+n = PP * QQ
+m = bytes_to_long(flag.encode())
+c = pow(m, 65537, n)
+print('n =', n)
+print('c =', c)
+</code></pre>
+<p><a href="https://blog.csdn.net/qq_51999772/article/details/121906311">这里</a>看了半天，终于悟了</p>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                下一篇
+              </div>
+              <a href="https://lzjtldys.github.io/post/kuai-mi-ma/">
+                <h3 class="post-title">
+                  块密码
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://lzjtldys.github.io/images/avatar.png?v=1718630324884" class="no-responsive avatar">
+    <div class="text-muted">随便写写</div>
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      最新文章
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/dragon-knight-ctf/">Dragon Knight CTF</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/shang-huan-de-li-jie-he-li-ti/">商环的理解和例题</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/mei-kan-dong-de-ti/">没看懂的题</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/nssctf-de-qu-ti-crypto/">NSSCTF的趣题(Crypto)</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/tut-ctf/">TuT CTF</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/shen-du-sou-suo/">剪枝</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/complex_rsa/">Complex_rsa</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/xyctf/">XYCTF </a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/yi-huo/">异或</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/rlwe/">RLWE</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      标签列表
+    </div>
+    <div class="row">
+      
+        <a href="https://lzjtldys.github.io/tag/6bDPyPDmg/" class="badge success">
+          比赛
+        </a>
+      
+        <a href="https://lzjtldys.github.io/tag/pM33mlY7t/" class="badge ">
+          RSA
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://lzjtldys.github.io/atom.xml" target="_blank">RSS</a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

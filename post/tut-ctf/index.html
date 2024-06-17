@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>TuT CTF | 辣子鸡的blog</title>
+<meta name="description" content="随便写写">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://lzjtldys.github.io/favicon.ico?v=1718630324884">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lzjtldys.github.io/styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://lzjtldys.github.io">辣子鸡的blog</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                首页
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="https://lzjtldys.github.io" class="menu">
+                归档
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="https://lzjtldys.github.io" class="menu">
+                标签
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/post/about" class="menu">
+                关于
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>TuT CTF</h1>
+            <p class="article-meta">
+              2024-06-03
+              
+                <a href="https://lzjtldys.github.io/tag/6bDPyPDmg/" class="badge secondary">
+                  比赛
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <h2 id="1pq">1.p+q</h2>
+<pre><code class="language-python">from Crypto.Util.number import *
+from gmpy2 import *
+from secret import flag
+
+BITS = 233
+
+def broken(x, bits):
+    return x&gt;&gt;bits
+
+def gen():
+    p,q = getPrime(512),getPrime(512)
+    n = p*q
+    e = 65537
+    return n, broken(p+q, BITS)
+
+n, hint = gen()
+e = 0x10001
+m = bytes_to_long(flag)
+assert m &lt; n
+c = pow(m, e, n)
+
+print(n)
+print(hint)
+print(c)
+
+'''
+107847645025513535850791225440130707186374273414737521825714442885442542984529827092766916748308266623066053421754530398675086374798530909982183476265477598220972320436343536618913608933549054793948336438240303192183575843300257235195070331758555882832698815894168120103459360566404203412796086643598204242029
+1505246122706281178983443268987790509406564031452059494152554645294649335244676839890
+16589212605025468264862689939961340646400626438824064459026078002373801735937861932598660491280834517490394340315480853421268981930217857435669572426110105938015092688880859031418213297139875807487434491329423279700179082306961439610731922669459168752958192842026918421354512654494583087220572962719510130677
+'''
+</code></pre>
+<p>写的时候想到这个思路了，结果不知道RealField(1000)，这几天知道了，就想起来了,就转化成了p的高位泄露，得尝试改一下位数上线</p>
+<pre><code class="language-python">from gmpy2 import *
+from Crypto.Util.number import *
+
+n =107847645025513535850791225440130707186374273414737521825714442885442542984529827092766916748308266623066053421754530398675086374798530909982183476265477598220972320436343536618913608933549054793948336438240303192183575843300257235195070331758555882832698815894168120103459360566404203412796086643598204242029
+hint = 1505246122706281178983443268987790509406564031452059494152554645294649335244676839890
+c = 16589212605025468264862689939961340646400626438824064459026078002373801735937861932598660491280834517490394340315480853421268981930217857435669572426110105938015092688880859031418213297139875807487434491329423279700179082306961439610731922669459168752958192842026918421354512654494583087220572962719510130677
+e = 65537
+ 
+#part1 get leak2
+PR.&lt;x&gt; = PolynomialRing(RealField(1000))
+f = x*((hint&lt;&lt;233)-x) - n 
+p2high = int(f.roots()[0][0])
+
+PR.&lt;x&gt; = PolynomialRing(Zmod(n))
+f = p2high + x
+res = f.small_roots(X=2^240,beta=0.4,epsilon=0.01)[0]
+p2 = int(p2high + res)
+q2 = n // p2
+d2 = inverse(e,(p2-1)*(q2-1))
+leak2 = pow(c, d2, n)
+print((leak2))
+print(long_to_bytes(56006392793428522912423049931419741108669154453784555135205143867930249675057361228618616034080076925))
+# flag{ccc2e285-7bb1-484e-ad62-58cc474ef9d4}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                下一篇
+              </div>
+              <a href="https://lzjtldys.github.io/post/shen-du-sou-suo/">
+                <h3 class="post-title">
+                  剪枝
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://lzjtldys.github.io/images/avatar.png?v=1718630324884" class="no-responsive avatar">
+    <div class="text-muted">随便写写</div>
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      最新文章
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/dragon-knight-ctf/">Dragon Knight CTF</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/shang-huan-de-li-jie-he-li-ti/">商环的理解和例题</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/mei-kan-dong-de-ti/">没看懂的题</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/nssctf-de-qu-ti-crypto/">NSSCTF的趣题(Crypto)</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/tut-ctf/">TuT CTF</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/shen-du-sou-suo/">剪枝</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/complex_rsa/">Complex_rsa</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/xyctf/">XYCTF </a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/yi-huo/">异或</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/rlwe/">RLWE</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      标签列表
+    </div>
+    <div class="row">
+      
+        <a href="https://lzjtldys.github.io/tag/6bDPyPDmg/" class="badge ">
+          比赛
+        </a>
+      
+        <a href="https://lzjtldys.github.io/tag/pM33mlY7t/" class="badge secondary">
+          RSA
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://lzjtldys.github.io/atom.xml" target="_blank">RSS</a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

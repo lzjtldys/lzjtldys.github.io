@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Dragon Knight CTF | 辣子鸡的blog</title>
+<meta name="description" content="随便写写">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://lzjtldys.github.io/favicon.ico?v=1718630324884">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lzjtldys.github.io/styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://lzjtldys.github.io">辣子鸡的blog</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                首页
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="https://lzjtldys.github.io" class="menu">
+                归档
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="https://lzjtldys.github.io" class="menu">
+                标签
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/post/about" class="menu">
+                关于
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>Dragon Knight CTF</h1>
+            <p class="article-meta">
+              2024-06-15
+              
+                <a href="https://lzjtldys.github.io/tag/6bDPyPDmg/" class="badge success">
+                  比赛
+                </a>
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <h2 id="一matrixrsa_revenge">一.MatrixRSA_Revenge</h2>
+<pre><code class="language-python">from Crypto.Util.number import *
+import os
+
+flag = b&quot;DRKCTF{??????????????}&quot; + os.urandom(212)
+
+p = getPrime(120)
+q = getPrime(120)
+print(f&quot;p = {p}&quot;)
+print(f&quot;q = {q}&quot;)
+
+part = [bytes_to_long(flag[16*i:16*(i+1)]) for i in range(16)]
+
+M = Matrix(Zmod(n),[
+    [part[4*i+j] for j in range(4)] for i in range(4)
+])
+
+e = 65537
+C = M ** e
+
+print(f&quot;C = {list(C)}&quot;)
+
+&quot;&quot;&quot;
+p = 724011645798721468405549293573288113   
+q = 712853480230590736297703668944546433
+C = [(354904294318305224658454053059339790915904962123902870614765704810196137, 307912599668649689143528844269686459695648563337814923172488152872006235, 143644686443811064172873392982322248654471792394264352463341325181752577, 22995887787365556743279529792687264972121816670422146768160153217903088), (111349308911096779758451570594323566987628804920420784718347230085486245, 370237591900013263581099395076767089468466012835217658851568690263421449, 305451886364184428434479088589515273362629589399867618474106045683764897, 454103583344277343974714791669312753685583930212748198341578178464249150), (168497521640129742759262423369385500102664740971338844248603058993335309, 228941893018899960301839898935872289351667488000643221589230804176281482, 340080333594340128998141220817079770261711483018587969623825086357581002, 122922413789905368029659916865893297311475500951645918611759627764993518), (10332477229415731242316540110058798318207430965033579181240340751539101, 238172263316130590821973648893483382211906906298557131324791759298887701, 487586702165464601760230182019344052665496627253691596871783460314632260, 12238020921585443139790088280608644406695242899000592355653073240122626)]
+&quot;&quot;&quot;
+</code></pre>
+<p>找了篇<a href="https://www.gcsu.edu/sites/files/page-assets/node-808/attachments/pangia.pdf">论文</a></p>
+<pre><code class="language-python">from Crypto.Util.number import *
+import gmpy2
+
+p = 724011645798721468405549293573288113
+q = 712853480230590736297703668944546433
+e = 65537
+n = p*q
+c = [(354904294318305224658454053059339790915904962123902870614765704810196137, 307912599668649689143528844269686459695648563337814923172488152872006235, 143644686443811064172873392982322248654471792394264352463341325181752577, 22995887787365556743279529792687264972121816670422146768160153217903088), (111349308911096779758451570594323566987628804920420784718347230085486245, 370237591900013263581099395076767089468466012835217658851568690263421449, 305451886364184428434479088589515273362629589399867618474106045683764897, 454103583344277343974714791669312753685583930212748198341578178464249150), (168497521640129742759262423369385500102664740971338844248603058993335309, 228941893018899960301839898935872289351667488000643221589230804176281482, 340080333594340128998141220817079770261711483018587969623825086357581002, 122922413789905368029659916865893297311475500951645918611759627764993518), (10332477229415731242316540110058798318207430965033579181240340751539101, 238172263316130590821973648893483382211906906298557131324791759298887701, 487586702165464601760230182019344052665496627253691596871783460314632260, 12238020921585443139790088280608644406695242899000592355653073240122626)]
+
+C = Matrix(Zmod(n),c)
+
+order_p = p*(p-1)*(p+1)*(p^2+p+1)
+order_q = q*(q-1)*(q+1)*(q^2+q+1)
+order = order_p * order_q
+
+d = gmpy2.invert(e,order)
+M = C ** d
+
+flag = b&quot;&quot;
+for i in range(4):
+    for j in range(4):
+        m = int(M[i,j])
+        flag += long_to_bytes(m)
+        
+print(flag)
+</code></pre>
+<h2 id="二ezdes">二.EzDES</h2>
+<pre><code class="language-python">from Crypto.Cipher import DES
+from Crypto.Util.Padding import pad
+from secret import flag,key
+key = bytes.fromhex(key)
+des = DES.new(key, DES.MODE_ECB)
+enc = des.encrypt(pad(flag,64))
+print(enc)
+&quot;&quot;&quot;
+b't\xe4f\x19\xc6\xef\xaaL\xc3R}\x08;K\xc9\x88\xa6|\nF\xc3\x12h\xcd\xd3x\xc
+3(\x91\x08\x841\xca\x8b\xc1\x94\xb5\x9f[\xcd\xc6\x9f\xf9\xf6\xca\xf5\x1a\x
+da\x16\xcf\x89\x154\xa1\xfe\xc5\x16\xcf\x89\x154\xa1\xfe\xc5'
+&quot;&quot;&quot;
+</code></pre>
+<pre><code class="language-python">from Crypto.Cipher import DES
+from itertools import product
+charset = &quot;0123456789abcdef&quot;
+C =b't\xe4f\x19\xc6\xef\xaaL\xc3R}\x08;K\xc9\x88\xa6|\nF\xc3\x12h\xcd\xd3x\xc3(\x91\x08\x841\xca\x8b\xc1\x94\xb5\x9f[\xcd\xc6\x9f\xf9\xf6\xca\xf5\x1a\x
+da\x16\xcf\x89\x154\xa1\xfe\xc5\x16\xcf\x89\x154\xa1\xfe\xc5'
+block = b&quot;\x16\xcf\x89\x154\xa1\xfe\xc5&quot;
+for i in product(charset, repeat=16):
+  key = bytes.fromhex(&quot;&quot;.join(i))
+  des = DES.new(key, DES.MODE_ECB)
+  tail = des.decrypt(block)
+  if tail[0] == tail[1] == tail[2] == tail[3]:
+     print(tail)
+     print(key)
+     print(des.encrypt(C))
+     break
+</code></pre>
+<h2 id="三myencrypto">三.MyEncrypto</h2>
+<pre><code class="language-python">from Crypto.Util.number import *
+from secret import flag      
+import random
+
+def getMyPrime():              
+    while True:              
+        r = random.getrandbits(64)              
+        _p = r**6 -3*r**5 - r**4 + r**2 - r - 6
+        _q = r**7 + 2*r**6 + r**5 + 4*r**4 + 7*r**2 + r + 4653
+        if isPrime(_p) and isPrime(_q):              
+            return _p, _q
+                      
+def enc(m, n):                        
+    return pow(m, 65537, n)              
+
+def LCG(s,a,b,n):
+    return (a*s + b) % n
+
+
+seed = bytes_to_long(flag)
+P = getPrime(512)
+a = random.randrange(0,P)
+b = random.randrange(0,P)
+
+def Roll():
+    global seed
+    seed = LCG(seed,a,b,P)
+    return seed % 2**16
+
+p, q = getMyPrime()
+n = p * q              
+enc_P = enc(P, n)
+print(f&quot;n = {n}&quot;)              
+print(f&quot;enc_P = {enc_P}&quot;)
+
+out = []
+for _ in range(40):
+    out.append(Roll())
+
+print(f&quot;a = {a}&quot;)
+print(f&quot;b = {b}&quot;)
+print(f&quot;out = {out}&quot;)
+&quot;&quot;&quot;
+r = 1248775963213848425
+P = 10679387699123200522776360035184725927822172255453595568464894884736102462568579313264894449779104030120028056158023524486966766295648236135714849745610937
+n = 17959692613208124553115435318871530105762927141420294800783695207170608966804977782615874404539156257549097962410144332053383210075663138848832474791712256427111304125146378883542387121684653496644116081809328796925343393644118376497507
+enc_P = 17215745298239635988196009014709535403293865406390546681749129213899045156482782458937447412919331336842808052179915132663427715069134196783415529688715962754860563850858056507148936427379551986735103284388996678146580229028006898491552
+a = 2759277675743644814124420138047586760905070650864591936190199977578763421196999718749092450720072564786874114432179104175692800471519816376692104515142375
+b = 8111240578821759579875175166986910195923820191652867334412871591814076020421468033017946066268237980082938735686222173713853299600396887041341974719819186
+out = [39566, 15295, 19818, 55685, 49100, 6517, 2675, 9567, 37243, 40312, 42906, 35874, 44178, 1256, 40298, 29149, 35721, 19886, 63020, 50116, 6844, 39897, 16134, 50218, 44609, 46188, 52712, 49903, 20933, 5441, 19411, 8330, 6904, 39350, 60853, 43446, 35910, 43728, 61533, 13757]
+&quot;&quot;&quot;
+</code></pre>
+<p>从<a href="https://dexterjie.github.io">这里</a>找的<br>
+<img src="https://lzjtldys.github.io/post-images/1718551887846.png" alt="" loading="lazy"></p>
+<pre><code class="language-python"># Sage
+
+# R = PolynomialRing(QQ, 'r')
+# f = r^13 - r^12 - 6*r^11 - r^10 - 12*r^9 + 4*r^8 - 27*r^7 + 4634*r^6 - 13970*r^5 - 4670*r^4 - 6*r^3 + 4610*r^2 - 4659*r - 27918 - 17959692613208124553115435318871530105762927141420294800783695207170608966804977782615874404539156257549097962410144332053383210075663138848832474791712256427111304125146378883542387121684653496644116081809328796925343393644118376497507
+# print(f.roots())
+
+from Crypto.Util.number import *
+import gmpy2
+
+n = 17959692613208124553115435318871530105762927141420294800783695207170608966804977782615874404539156257549097962410144332053383210075663138848832474791712256427111304125146378883542387121684653496644116081809328796925343393644118376497507
+enc_P = 17215745298239635988196009014709535403293865406390546681749129213899045156482782458937447412919331336842808052179915132663427715069134196783415529688715962754860563850858056507148936427379551986735103284388996678146580229028006898491552
+a = 2759277675743644814124420138047586760905070650864591936190199977578763421196999718749092450720072564786874114432179104175692800471519816376692104515142375
+b = 8111240578821759579875175166986910195923820191652867334412871591814076020421468033017946066268237980082938735686222173713853299600396887041341974719819186
+out = [39566, 15295, 19818, 55685, 49100, 6517, 2675, 9567, 37243, 40312, 42906, 35874, 44178, 1256, 40298, 29149, 35721, 19886, 63020, 50116, 6844, 39897, 16134, 50218, 44609, 46188, 52712, 49903, 20933, 5441, 19411, 8330, 6904, 39350, 60853, 43446, 35910, 43728, 61533, 13757]
+
+def get_P(n,c):
+    r = gmpy2.iroot(n,13)[0]                
+    for i in range(10000):                
+        p = r**6 -3*r**5 - r**4 + r**2 - r - 6
+        q = r**7 + 2*r**6 + r**5 + 4*r**4 + 7*r**2 + r + 4653
+        r = r+1          
+        if isPrime(p) and isPrime(q) and n==p*q:                
+            q = n // p
+            d = gmpy2.invert(65537,(p-1)*(q-1))
+            P = pow(c,d,n)
+            #             print(P)
+            return int(P)
+
+P = get_P(n,enc_P)
+
+L = [0] + out
+n = len(out)
+A = [1]
+B = [0]
+for i in range(1,n):
+    A.append(a*A[i-1] % P)
+    B.append((a*B[i-1] + (a*L[i]+b-L[i+1])*gmpy2.invert(2^16,P))%P)
+
+A = A[1:]
+B = B[1:]
+
+Ge = Matrix(ZZ,n+1,n+1)
+for i in range(len(A)):
+    Ge[i,i] = P
+    Ge[-2,i] = A[i]
+    Ge[-1,i] = B[i]
+
+Ge[-2,-2] = 1
+Ge[-1,-1] = P // 2^16
+
+M = Ge.LLL()[0]
+H1 = M[-2]
+L1 = out[0]
+seed1 = H1 * 2^16 + L1
+
+seed = ((seed1 - b)*gmpy2.invert(a,P))%P
+print(long_to_bytes(int(seed)))
+# DRKCTF{a57b63a6-ecf5-46d3-a501-2d359a4fd168}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                下一篇
+              </div>
+              <a href="https://lzjtldys.github.io/post/shang-huan-de-li-jie-he-li-ti/">
+                <h3 class="post-title">
+                  商环的理解和例题
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://lzjtldys.github.io/images/avatar.png?v=1718630324884" class="no-responsive avatar">
+    <div class="text-muted">随便写写</div>
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      最新文章
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/dragon-knight-ctf/">Dragon Knight CTF</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/shang-huan-de-li-jie-he-li-ti/">商环的理解和例题</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/mei-kan-dong-de-ti/">没看懂的题</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/nssctf-de-qu-ti-crypto/">NSSCTF的趣题(Crypto)</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/tut-ctf/">TuT CTF</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/shen-du-sou-suo/">剪枝</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/complex_rsa/">Complex_rsa</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/xyctf/">XYCTF </a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/yi-huo/">异或</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/rlwe/">RLWE</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      标签列表
+    </div>
+    <div class="row">
+      
+        <a href="https://lzjtldys.github.io/tag/6bDPyPDmg/" class="badge warning">
+          比赛
+        </a>
+      
+        <a href="https://lzjtldys.github.io/tag/pM33mlY7t/" class="badge warning">
+          RSA
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://lzjtldys.github.io/atom.xml" target="_blank">RSS</a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

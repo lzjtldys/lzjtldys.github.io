@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>块密码 | 辣子鸡的blog</title>
+<meta name="description" content="随便写写">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://lzjtldys.github.io/favicon.ico?v=1718630324884">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lzjtldys.github.io/styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://lzjtldys.github.io">辣子鸡的blog</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                首页
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="https://lzjtldys.github.io" class="menu">
+                归档
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="https://lzjtldys.github.io" class="menu">
+                标签
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/post/about" class="menu">
+                关于
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>块密码</h1>
+            <p class="article-meta">
+              2024-03-02
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <p>[ACTF新生赛2020]crypto-aes</p>
+<pre><code class="language-python">from Cryptodome.Cipher import AES
+import os
+import gmpy2
+from flag import FLAG
+from Cryptodome.Util.number import *
+
+def main():
+    key=os.urandom(2)*16
+    iv=os.urandom(16)
+    print(bytes_to_long(key)^bytes_to_long(iv))
+    aes=AES.new(key,AES.MODE_CBC,iv)
+    enc_flag = aes.encrypt(FLAG)
+    print(enc_flag)
+if __name__==&quot;__main__&quot;:
+    main()
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                下一篇
+              </div>
+              <a href="https://lzjtldys.github.io/post/dsa/">
+                <h3 class="post-title">
+                  DSA
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://lzjtldys.github.io/images/avatar.png?v=1718630324884" class="no-responsive avatar">
+    <div class="text-muted">随便写写</div>
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      最新文章
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/dragon-knight-ctf/">Dragon Knight CTF</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/shang-huan-de-li-jie-he-li-ti/">商环的理解和例题</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/mei-kan-dong-de-ti/">没看懂的题</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/nssctf-de-qu-ti-crypto/">NSSCTF的趣题(Crypto)</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/tut-ctf/">TuT CTF</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/shen-du-sou-suo/">剪枝</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/complex_rsa/">Complex_rsa</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/xyctf/">XYCTF </a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/yi-huo/">异或</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/rlwe/">RLWE</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      标签列表
+    </div>
+    <div class="row">
+      
+        <a href="https://lzjtldys.github.io/tag/6bDPyPDmg/" class="badge secondary">
+          比赛
+        </a>
+      
+        <a href="https://lzjtldys.github.io/tag/pM33mlY7t/" class="badge secondary">
+          RSA
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://lzjtldys.github.io/atom.xml" target="_blank">RSS</a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>

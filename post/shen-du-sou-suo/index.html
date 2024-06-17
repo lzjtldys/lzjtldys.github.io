@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>剪枝 | 辣子鸡的blog</title>
+<meta name="description" content="随便写写">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="shortcut icon" href="https://lzjtldys.github.io/favicon.ico?v=1718630324884">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lzjtldys.github.io/styles/main.css">
+
+
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+  </head>
+  <body>
+  
+    <nav class="navbar border fixed split-nav">
+  <div class="nav-brand">
+    <h3><a href="https://lzjtldys.github.io">辣子鸡的blog</a></h3>
+  </div>
+  <div class="collapsible">
+    <input id="collapsible1" type="checkbox" name="collapsible1">
+    <button>
+      <label for="collapsible1">
+        <div class="bar1"></div>
+        <div class="bar2"></div>
+        <div class="bar3"></div>
+      </label>
+    </button>
+    <div class="collapsible-body">
+      <ul class="inline">
+        
+          <li>
+            
+              <a href="/" class="menu">
+                首页
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="https://lzjtldys.github.io" class="menu">
+                归档
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="https://lzjtldys.github.io" class="menu">
+                标签
+              </a>
+            
+          </li>
+        
+          <li>
+            
+              <a href="/post/about" class="menu">
+                关于
+              </a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div id="top" class="row site">
+      <div class="sm-12 md-8 col">
+        <div class="paper">
+          <article class="article">
+            <h1>剪枝</h1>
+            <p class="article-meta">
+              2024-05-14
+              
+            </p>
+            
+            <div class="post-content" v-pre>
+              <h1 id="2024-xyctf-happy_to_solve2">[2024 XYCTF] happy_to_solve2</h1>
+<pre><code class="language-python">import random
+from Crypto.Util.number import *
+from secrets import flag
+
+
+def get_happy_prime():
+    while 1:
+        p = int(&quot;&quot;.join([random.choice(&quot;123&quot;) for _ in range(512)]))
+        q = int(&quot;&quot;.join([random.choice(&quot;567&quot;) for _ in range(512)]))
+        if isPrime(p) and isPrime(q):
+            return (p,q)
+
+m = bytes_to_long(flag)
+p ,q= get_happy_prime()
+n = p * q
+e = 65537
+print(n)
+print(pow(m, e, n))
+# 697906506747097082736076931509594586899561519277373830451275402914416296858960649459482027106166486723487162428522597262774248272216088755005277069446993003521270487750989061229071167729138628583207229945902389632065500739730301375338674342457656803764567184544685006193130563116558641331897204457729877920989968662546183628637193220770495938729301979912328865798266631957128761871326655572836258178871966196973138373358029531478246243442559418904559585334351259080578222274926069834941166567112522869638854253933559832822899069320370733424453856240903784235604251466010104012061821038897933884352804297256364409157501116832788696434711523621632436970698827611375698724661553712549209133526623456888111161142213830821361143023186927163314212097199831985368310770663850851571934739809387798422381702174820982531508641022827776262236373967579266271031713520262606203067411268482553539580686495739014567368858613520107678565628269250835478345171330669316220473129104495659093134763261751546990704365966783697780787341963138501
+# 153383826085102296581238539677668696644156148059026868813759015106139131297135097831661048493079405226972222492151356105759235749502324303047037349410709021152255315429280760639113724345836532087970918453353723090554450581657930847674930226113840172368662838756446364482977092478979838209396761279326533419699056209983721842484996150025403009644653678928025861445324715419893797015875541525590135843027312322236085581571452084477262582966972702577136904385741443870527205640874446616413917231260133364227248928492574610248881137364204914001412269740461851747883355414968499272944590071623223603501698004227753335552646715567802825755799597955409228004284739743749531270833084850113574712041224896044525292591264637452797151098802604186311724597450780520140413704697374209653369969451501627583467893160412780732575085846467289134920886789952338174193202234175299652687560232593212131693456966318670843605238958724126368185289703563591477049105538528244632434869965333722691837462591128379816582723367039674028619947057144546
+</code></pre>
+<p>题解：</p>
+<pre><code class="language-python">from Crypto.Util.number import *
+from itertools import *
+
+e = 65537
+n = 697906506747097082736076931509594586899561519277373830451275402914416296858960649459482027106166486723487162428522597262774248272216088755005277069446993003521270487750989061229071167729138628583207229945902389632065500739730301375338674342457656803764567184544685006193130563116558641331897204457729877920989968662546183628637193220770495938729301979912328865798266631957128761871326655572836258178871966196973138373358029531478246243442559418904559585334351259080578222274926069834941166567112522869638854253933559832822899069320370733424453856240903784235604251466010104012061821038897933884352804297256364409157501116832788696434711523621632436970698827611375698724661553712549209133526623456888111161142213830821361143023186927163314212097199831985368310770663850851571934739809387798422381702174820982531508641022827776262236373967579266271031713520262606203067411268482553539580686495739014567368858613520107678565628269250835478345171330669316220473129104495659093134763261751546990704365966783697780787341963138501
+c = 153383826085102296581238539677668696644156148059026868813759015106139131297135097831661048493079405226972222492151356105759235749502324303047037349410709021152255315429280760639113724345836532087970918453353723090554450581657930847674930226113840172368662838756446364482977092478979838209396761279326533419699056209983721842484996150025403009644653678928025861445324715419893797015875541525590135843027312322236085581571452084477262582966972702577136904385741443870527205640874446616413917231260133364227248928492574610248881137364204914001412269740461851747883355414968499272944590071623223603501698004227753335552646715567802825755799597955409228004284739743749531270833084850113574712041224896044525292591264637452797151098802604186311724597450780520140413704697374209653369969451501627583467893160412780732575085846467289134920886789952338174193202234175299652687560232593212131693456966318670843605238958724126368185289703563591477049105538528244632434869965333722691837462591128379816582723367039674028619947057144546
+
+def find(ph,qh):
+    if(len(ph) == 512):
+        p = int(ph)
+        q = n // p
+        if(p*q == n):
+            d = inverse(e,(p-1)*(q-1))
+            print(long_to_bytes(pow(c,d,n)))
+            exit()
+    
+    pmin = int(ph + (512-len(ph))*&quot;1&quot;)
+    qmin = int(qh + (512-len(qh))*&quot;5&quot;)
+    pmax = int(ph + (512-len(ph))*&quot;3&quot;)
+    qmax = int(qh + (512-len(qh))*&quot;7&quot;)
+
+    if(pmin*qmin &lt;= n and pmax*qmax &gt;=n):
+        for i in (&quot;1&quot;,&quot;2&quot;,&quot;3&quot;):
+            for j in (&quot;5&quot;,&quot;6&quot;,&quot;7&quot;):
+                find(ph+i,qh+j)
+
+find(&quot;&quot;,&quot;&quot;)
+
+
+#XYCTF{7f4b2241951976ce5ef6df44503209059997e5085d1bc21f6bef4d9effb29fd0}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+        <div class="paper" data-aos="fade-in">
+          
+            <div class="next-post">
+              <div class="next">
+                下一篇
+              </div>
+              <a href="https://lzjtldys.github.io/post/complex_rsa/">
+                <h3 class="post-title">
+                  Complex_rsa
+                </h3>
+              </a>
+            </div>
+          
+        </div>
+        
+      </div>
+
+      <div class="sm-12 md-4 col sidebar">
+  <div class="paper info-container">
+    <img src="https://lzjtldys.github.io/images/avatar.png?v=1718630324884" class="no-responsive avatar">
+    <div class="text-muted">随便写写</div>
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      最新文章
+    </div>
+    <div class="row">
+      <ul>
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/dragon-knight-ctf/">Dragon Knight CTF</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/shang-huan-de-li-jie-he-li-ti/">商环的理解和例题</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/mei-kan-dong-de-ti/">没看懂的题</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/nssctf-de-qu-ti-crypto/">NSSCTF的趣题(Crypto)</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/tut-ctf/">TuT CTF</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/shen-du-sou-suo/">剪枝</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/complex_rsa/">Complex_rsa</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/xyctf/">XYCTF </a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/yi-huo/">异或</a>
+            </li>
+          
+        
+          
+            <li>
+              <a href="https://lzjtldys.github.io/post/rlwe/">RLWE</a>
+            </li>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+    </div>
+  </div>
+  <div class="paper">
+    <div class="sidebar-title">
+      标签列表
+    </div>
+    <div class="row">
+      
+        <a href="https://lzjtldys.github.io/tag/6bDPyPDmg/" class="badge warning">
+          比赛
+        </a>
+      
+        <a href="https://lzjtldys.github.io/tag/pM33mlY7t/" class="badge secondary">
+          RSA
+        </a>
+      
+    </div>
+  </div>
+  <div class="paper">
+    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://lzjtldys.github.io/atom.xml" target="_blank">RSS</a>
+  </div>
+</div>
+
+
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+</script>
+
+
+
+
+  </body>
+</html>
